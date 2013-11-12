@@ -1,6 +1,8 @@
 import os
 import re
 import sys
+import errno
+import subprocess
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.sdist import sdist
@@ -27,6 +29,26 @@ except ImportError:
 
 # current location
 here = os.path.abspath(os.path.dirname(__file__))
+
+
+def exec_process(cmdline, silent=True, input=None, **kwargs):
+    """Execute a subprocess and returns the returncode, stdout buffer and stderr buffer.
+    Optionally prints stdout and stderr while running."""
+    try:
+        sub = subprocess.Popen(args=cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+        stdout, stderr = sub.communicate(input=input)
+        returncode = sub.returncode
+        if not silent:
+            sys.stdout.write(stdout)
+            sys.stderr.write(stderr)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            raise RuntimeError('"%s" is not present on this system' % cmdline[0])
+        else:
+            raise
+    if returncode != 0:
+        raise RuntimeError('Got return value %d while executing "%s", stderr output was:\n%s' % (returncode, " ".join(cmdline), stderr.decode("utf-8").rstrip("\n")))
+    return stdout
 
 
 #-----------------------------------------------------------------------------
@@ -58,6 +80,26 @@ class CheckSDist(sdist):
 cmdclass['sdist'] = CheckSDist
 
 
+class BaseMurmurMixin:
+
+    murmur_dir = os.path.join(here, 'deps', 'murmurhash')
+
+    def build_murmur(self):
+        cflags = '-fPIC'
+        env = os.environ.copy()
+        env['CPPFLAGS'] = ' '.join(x for x in (cflags, env.get('CPPFLAGS', None)) if x)
+        exec_process(['sh', 'autogen.sh'], cwd=self.murmur_dir, env=env, silent=True)
+        exec_process(['./configure'], cwd=self.murmur_dir, env=env, silent=True)
+        exec_process(['make'], cwd=self.murmur_dir, env=env, silent=False)
+
+    def prepare_extensions(self):
+        self.murmur_lib = os.path.join(self.murmur_dir, '.libs', 'libMurmurHash3.a')
+        if not os.path.exists(os.path.join(self.murmur_dir, '.libs')):
+            self.build_murmur()
+        self.extensions[0].extra_objects.extend([self.murmur_lib])
+        self.compiler.add_include_dir(self.murmur_lib)
+
+
 if cython_installed:
 
     class CythonCommand(build_ext_c):
@@ -70,7 +112,16 @@ if cython_installed:
         def build_extension(self, ext):
             pass
 
-    class zbuild_ext(build_ext_c):
+
+    class MurmurMixin(BaseMurmurMixin):
+
+        def build_extensions(self):
+            self.prepare_extensions()
+            build_ext_c.build_extensions(self)
+
+
+    class zbuild_ext(MurmurMixin, build_ext_c):
+
         def run(self):
             from distutils.command.build_ext import build_ext as _build_ext
             return _build_ext.run(self)
@@ -80,7 +131,7 @@ if cython_installed:
 
 else:
 
-    class CheckingBuildExt(build_ext):
+    class CheckingBuildExt(BaseMurmurMixin, build_ext):
         """Subclass build_ext to get clearer report if Cython is neccessary."""
 
         def check_cython_extensions(self, extensions):
@@ -90,6 +141,7 @@ else:
                     assert os.path.exists(src), msg
 
         def build_extensions(self):
+            self.prepare_extensions()
             self.check_cython_extensions(self.extensions)
             self.check_extensions_list(self.extensions)
 
