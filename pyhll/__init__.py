@@ -10,5 +10,11 @@ __docformat__ = 'restructuredtext'
 
 # -eof meta-
 
-from .hll import Cardinality
+from .hll import (
+    Cardinality,
+    precision_for_error,
+    error_for_precision,
+    bytes_for_precision,
+)
+
 
