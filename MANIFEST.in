@@ -8,8 +8,9 @@ graft docs
 prune docs/build
 prune docs/html
 
-graft src
 graft pyhll
+recursive-include src *
+recursive-include deps *
 
 global-exclude *.so
 global-exclude *.pyd
