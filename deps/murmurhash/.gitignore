@@ -23,12 +23,7 @@ vgcore.*
 /depcomp
 /install-sh
 /libtool
-/libuv.a
-/libuv.dylib
-/libuv.pc
-/libuv.so
 /ltmain.sh
 /missing
-/test-driver
 Makefile
 Makefile.in

@@ -10,7 +10,8 @@ prune docs/html
 
 graft pyhll
 recursive-include src *
-recursive-include deps *
+recursive-include deps/murmurhash *.cpp *.h m4 configure.ac autogen.sh Makefile.am
+exclude deps/murmurhash/aclocal.m4
 
 global-exclude *.so
 global-exclude *.pyd
