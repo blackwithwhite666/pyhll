@@ -1,4 +1,4 @@
-"""Small library for in-memory aggregation."""
+"""Small library for in-memory cardinality computing."""
 
 VERSION = (0, 1, 0)
 
@@ -15,6 +15,8 @@ from .hll import (
     precision_for_error,
     error_for_precision,
     bytes_for_precision,
+    MIN_PRECISION,
+    MAX_PRECISION,
 )
 
 
