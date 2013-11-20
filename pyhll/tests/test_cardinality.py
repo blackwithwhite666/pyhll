@@ -1,5 +1,10 @@
 from __future__ import absolute_import
 
+try:
+    from cPickle import dumps, loads
+except ImportError:
+    from pickle import dumps, loads
+
 from pyhll.tests.base import TestCase
 from pyhll import Cardinality, MIN_PRECISION, MAX_PRECISION
 
@@ -14,11 +19,11 @@ class CardinalityTest(TestCase):
         self.assertEqual(MIN_PRECISION, Cardinality(MIN_PRECISION).precision)
         self.assertEqual(MAX_PRECISION, Cardinality(MAX_PRECISION).precision)
 
-    def test_size(self):
+    def test_cardinality(self):
         t = (b'foo', b'bar')
         c = Cardinality()
         c.update(t)
-        self.assertAlmostEqual(len(t), c.size, places=1)
+        self.assertAlmostEqual(len(t), c.cardinality, places=1)
 
     def test_count(self):
         t = (b'foo', b'bar')
@@ -44,3 +49,21 @@ class CardinalityTest(TestCase):
         self.assertEqual(2, len(c))
         c.update([b'bar', b'boz'])
         self.assertEqual(4, len(c))
+
+    def test_union(self):
+        c1 = Cardinality()
+        c2 = Cardinality()
+        c1.add('foo')
+        c2.add('bar')
+        self.assertEqual(2, len(c1.union(c2)))
+        c1.add('bar')
+        self.assertEqual(2, len(c1 | c2))
+
+    def test_pickle(self):
+        c = Cardinality()
+        c.add('foo')
+        c.add('bar')
+        self.assertEqual(2, len(c))
+        dump = dumps(c)
+        restored_c = loads(dump)
+        self.assertEqual(2, len(restored_c))

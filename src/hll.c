@@ -315,3 +315,51 @@ uint64_t hll_bytes_for_precision(int prec) {
     return words * sizeof(uint32_t);
 }
 
+/**
+ * Return union of two sets.
+ * @arg h The merged HLL
+ * @arg first The first HLL to merge
+ * @arg second The second HLL to merge
+ * @return 0 on success
+ */
+int hll_merge(hll_t *h, hll_t *first, hll_t *second) {
+    // Check that precisions are equal.
+    if(h->precision != first->precision || h->precision != second->precision) {
+        return -1;
+    }
+
+    // Determine how many registers are needed
+    int reg = NUM_REG(h->precision);
+
+    // Get the full words required
+    int words = INT_CEIL(reg, REG_PER_WORD);
+
+    int this_val, that_val, mask, word;
+    for (int bucket = 0; bucket < words; bucket++) {
+        word = 0;
+        for (int j = 0; j < REG_PER_WORD; j++) {
+            mask = 0x1f << (REG_WIDTH * j);
+            this_val = first->registers[bucket] & mask;
+            that_val = second->registers[bucket] & mask;
+            word |= (this_val < that_val) ? that_val : this_val;
+        }
+        h->registers[bucket] = word;
+    }
+
+    return 0;
+}
+
+/**
+ * Estimates words count of the HLL
+ * @arg h The hll to query
+ * @return An words count
+ */
+int hll_words(hll_t *h) {
+    // Determine how many registers are needed
+    int reg = NUM_REG(h->precision);
+
+    // Get the full words required
+    int words = INT_CEIL(reg, REG_PER_WORD);
+
+    return words;
+}

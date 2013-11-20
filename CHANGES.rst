@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.2.0
+-----
+
+- Add ability to union sets;
+- Add serialization support;
+
 0.1.1
 -----
 

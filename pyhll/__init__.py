@@ -1,6 +1,6 @@
 """Small library for in-memory cardinality computing."""
 
-VERSION = (0, 1, 1)
+VERSION = (0, 2, 0)
 
 __version__ = '.'.join(map(str, VERSION[0:3]))
 __author__ = 'Lipin Dmitriy'
@@ -18,5 +18,3 @@ from .hll import (
     MIN_PRECISION,
     MAX_PRECISION,
 )
-
-

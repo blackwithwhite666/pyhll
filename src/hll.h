@@ -73,4 +73,20 @@ double hll_error_for_precision(int prec);
  */
 uint64_t hll_bytes_for_precision(int prec);
 
+/**
+ * Return union of two sets.
+ * @arg h The merged HLL
+ * @arg first The first HLL to merge
+ * @arg second The second HLL to merge
+ * @return 0 on success
+ */
+int hll_merge(hll_t *h, hll_t *first, hll_t *second);
+
+/**
+ * Estimates words count of the HLL
+ * @arg h The hll to query
+ * @return An words count
+ */
+int hll_words(hll_t *h);
+
 #endif
