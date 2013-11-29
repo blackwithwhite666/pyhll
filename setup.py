@@ -82,22 +82,25 @@ cmdclass['sdist'] = CheckSDist
 
 class BaseMurmurMixin:
 
-    murmur_dir = os.path.join(here, 'deps', 'murmurhash')
+    murmur_dir = os.path.join(here, 'deps', 'murmurhash3')
 
     def build_murmur(self):
         cflags = '-fPIC'
         env = os.environ.copy()
         env['CPPFLAGS'] = ' '.join(x for x in (cflags, env.get('CPPFLAGS', None)) if x)
-        exec_process(['sh', 'autogen.sh'], cwd=self.murmur_dir, env=env, silent=True)
-        exec_process(['./configure'], cwd=self.murmur_dir, env=env, silent=True)
-        exec_process(['make'], cwd=self.murmur_dir, env=env, silent=False)
+        exec_process([
+            sys.executable,
+            os.path.join(self.murmur_dir, 'waf'),
+            'distclean',
+            'configure',
+            'build',
+        ], cwd=self.murmur_dir, env=env, silent=False)
 
     def prepare_extensions(self):
-        self.murmur_lib = os.path.join(self.murmur_dir, '.libs', 'libMurmurHash3.a')
-        if not os.path.exists(os.path.join(self.murmur_dir, '.libs')):
+        self.murmur_lib = os.path.join(self.murmur_dir, 'build_directory', 'libMurmurHash3.a')
+        if not os.path.exists(os.path.join(self.murmur_dir, 'build_directory')):
             self.build_murmur()
         self.extensions[0].extra_objects.extend([self.murmur_lib])
-        self.compiler.add_include_dir(self.murmur_lib)
 
 
 if cython_installed:

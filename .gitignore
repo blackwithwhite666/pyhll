@@ -13,6 +13,9 @@ sdist
 develop-eggs
 .installed.cfg
 *.so
+.waf*
+.lock*
+build_directory
 MANIFEST
 docs/html/
 
