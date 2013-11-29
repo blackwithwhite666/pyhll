@@ -185,6 +185,7 @@ modules = {
             os.path.join(here, 'src', 'hll_constants.c'),
         ],
         extra_compile_args=['-std=c99'],
+        libraries=["stdc++"],
     ),
 }
 
