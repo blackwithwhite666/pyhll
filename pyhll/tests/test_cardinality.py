@@ -67,3 +67,8 @@ class CardinalityTest(TestCase):
         dump = dumps(c)
         restored_c = loads(dump)
         self.assertEqual(2, len(restored_c))
+
+    def test_fluent(self):
+        c = Cardinality()
+        self.assertIs(c, c.add('foo').add('bar'))
+        self.assertEqual(2, len(c))

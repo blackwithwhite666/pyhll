@@ -132,11 +132,13 @@ cdef class Cardinality(object):
         """Add one string."""
         cdef char* c_string = s
         hll_add(self._c_hll, c_string)
+        return self
 
     def update(self, strings):
         """Add multiple strings at once."""
         for s in strings:
             self.add(s)
+        return self
 
     def union(self, Cardinality other):
         """Return union of two set."""

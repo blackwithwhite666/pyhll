@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.2.3
+-----
+
+- Add support for fluent iface;
+
 0.2.1-0.2.2
 -----------
 
