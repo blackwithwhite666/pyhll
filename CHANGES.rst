@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.2.4
+-----
+
+- Add dump and load support;
+
 0.2.3
 -----
 

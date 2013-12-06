@@ -53,7 +53,7 @@ MAX_PRECISION = HLL_MAX_PRECISION
 def recreate_cardinality(int prec, array.array a):
     """Restore pickled set."""
     cdef Cardinality c = Cardinality(prec)
-    c.load_registers(a)
+    c.load(a)
     return c
 
 
@@ -83,7 +83,7 @@ cdef class Cardinality(object):
                 hll_destroy(self._c_hll)
             free(self._c_hll)
 
-    cdef array.array dump_registers(self):
+    cpdef array.array dump(self):
         cdef int words = hll_words(self._c_hll)
         cdef array.array a = array.array('I')
         array.resize(a, words)
@@ -93,7 +93,7 @@ cdef class Cardinality(object):
             u[i] = self._c_hll.registers[i]
         return a
 
-    cdef load_registers(self, array.array a):
+    cpdef load(self, array.array a):
         cdef int words = hll_words(self._c_hll)
         if len(a) != words:
             raise ValueError("Given array has wrong length.")
@@ -101,6 +101,7 @@ cdef class Cardinality(object):
         cdef unsigned int i
         for i in range(words):
             self._c_hll.registers[i] = u[i]
+        return self
 
     property precision:
 
@@ -152,7 +153,7 @@ cdef class Cardinality(object):
         return self.union(other)
 
     def __reduce__(self):
-        return (recreate_cardinality, (self.precision, self.dump_registers()))
+        return (recreate_cardinality, (self.precision, self.dump()))
 
     def __repr__(self):
         return ('<{0}(cardinality={2.cardinality}) at {1}>'.

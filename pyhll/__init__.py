@@ -1,6 +1,6 @@
 """Small library for in-memory cardinality computing."""
 
-VERSION = (0, 2, 3)
+VERSION = (0, 2, 4)
 
 __version__ = '.'.join(map(str, VERSION[0:3]))
 __author__ = 'Lipin Dmitriy'
